@@ -2,21 +2,18 @@
 
 This is a simple browser-based board game created for the Client Side Web Development CA2.
 
-## Files
-
-- `index.html` creates the webpage structure.
-- `style.css` creates the visual design and the hexagon shape.
-- `script.js` creates the board and controls the game logic.
-
 ## Features
 
 - 10x10 grid of connected hexagons.
 - Hover highlight.
-- Click to select a hexagon.
-- Click again to deselect.
+- Click to select and deselect a hexagon.
 - Monster character on the board.
 - Possible movement tiles highlighted in green.
-- Monster can move to neighbouring hexagons.
+- Three crystals to collect.
+- Score counter.
+- Moves left counter.
+- Win condition when all crystals are collected.
+- Game over condition when moves run out.
 
 ## How to run
 

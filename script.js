@@ -1,38 +1,40 @@
 // Monster Mayhem
 // This project creates a 10x10 board of connected hexagons.
-// The user can select/deselect hexagons and move a monster to nearby tiles.
+// The player moves the monster and collects crystals.
 
-// Board size from the CA brief
 const rows = 10;
 const cols = 10;
 
-// Hexagon measurements.
-// These are used to calculate where each hexagon should be placed.
 const hexWidth = 72;
 const hexHeight = 82;
 
-// Horizontal and vertical spacing.
-// The values are smaller than the full width/height so the hexagons touch.
 const horizontalSpacing = 54;
 const verticalSpacing = 62;
 
-// Starting position of the monster
 let monsterPosition = {
   row: 4,
   col: 4
 };
 
-// Stores the currently selected tile.
-// null means nothing is selected.
 let selectedTile = null;
+
+let score = 0;
+let movesLeft = 15;
+let gameOver = false;
+
+const crystals = [
+  { row: 1, col: 2, collected: false },
+  { row: 6, col: 7, collected: false },
+  { row: 8, col: 3, collected: false }
+];
 
 const board = document.getElementById("board");
 const statusText = document.getElementById("status");
+const scoreText = document.getElementById("score");
+const movesText = document.getElementById("moves");
 
-// This array stores all tile elements so we can update them later.
 const tiles = [];
 
-// Create the full 10x10 grid
 function createBoard() {
   for (let row = 0; row < rows; row++) {
     tiles[row] = [];
@@ -45,8 +47,6 @@ function createBoard() {
       hex.dataset.col = col;
       hex.setAttribute("aria-label", `Hexagon row ${row + 1}, column ${col + 1}`);
 
-      // Odd rows are moved slightly to the right.
-      // This creates the connected hexagon grid pattern.
       const offsetX = row % 2 === 0 ? 0 : hexWidth / 2;
 
       const x = col * horizontalSpacing + offsetX + 20;
@@ -67,11 +67,13 @@ function createBoard() {
   updateBoard();
 }
 
-// Handles selecting, deselecting and moving the monster
 function handleTileClick(row, col) {
+  if (gameOver) {
+    return;
+  }
+
   const clickedTile = { row, col };
 
-  // If the clicked tile is already selected, deselect it.
   if (
     selectedTile &&
     selectedTile.row === row &&
@@ -83,33 +85,60 @@ function handleTileClick(row, col) {
     return;
   }
 
-  // If a movement tile is clicked, move the monster.
   if (selectedTile && isNeighbour(selectedTile, clickedTile)) {
     monsterPosition = clickedTile;
     selectedTile = clickedTile;
-    statusText.textContent = `Monster moved to row ${row + 1}, column ${col + 1}.`;
+    movesLeft--;
+
+    checkCrystalCollection();
+    checkGameResult();
+
     updateBoard();
     return;
   }
 
-  // Otherwise select the clicked tile.
   selectedTile = clickedTile;
   statusText.textContent = `Selected row ${row + 1}, column ${col + 1}.`;
   updateBoard();
 }
 
-// Checks whether a tile is next to another tile.
-// Hexagon grids have different neighbours depending on whether the row is even or odd.
+function checkCrystalCollection() {
+  for (let i = 0; i < crystals.length; i++) {
+    const crystal = crystals[i];
+
+    if (
+      !crystal.collected &&
+      crystal.row === monsterPosition.row &&
+      crystal.col === monsterPosition.col
+    ) {
+      crystal.collected = true;
+      score++;
+      statusText.textContent = "Crystal collected!";
+      return;
+    }
+  }
+
+  statusText.textContent = "Monster moved. Keep collecting crystals.";
+}
+
+function checkGameResult() {
+  if (score === crystals.length) {
+    gameOver = true;
+    statusText.textContent = "You win! All crystals were collected.";
+  } else if (movesLeft === 0) {
+    gameOver = true;
+    statusText.textContent = "Game over! You ran out of moves.";
+  }
+}
+
 function isNeighbour(tileA, tileB) {
   const rowDifference = tileB.row - tileA.row;
   const colDifference = tileB.col - tileA.col;
 
-  // Same row: left or right
   if (rowDifference === 0 && Math.abs(colDifference) === 1) {
     return true;
   }
 
-  // Even row diagonal neighbours
   if (tileA.row % 2 === 0) {
     return (
       (rowDifference === -1 && (colDifference === -1 || colDifference === 0)) ||
@@ -117,15 +146,16 @@ function isNeighbour(tileA, tileB) {
     );
   }
 
-  // Odd row diagonal neighbours
   return (
     (rowDifference === -1 && (colDifference === 0 || colDifference === 1)) ||
     (rowDifference === 1 && (colDifference === 0 || colDifference === 1))
   );
 }
 
-// Updates colours, selected tile, possible path and monster position
 function updateBoard() {
+  scoreText.textContent = `Score: ${score} / ${crystals.length}`;
+  movesText.textContent = `Moves left: ${movesLeft}`;
+
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const tile = tiles[row][col];
@@ -143,7 +173,6 @@ function updateBoard() {
         tile.classList.add("selected");
       }
 
-      // Show possible movement tiles only when the monster tile is selected.
       if (
         selectedTile &&
         selectedTile.row === monsterPosition.row &&
@@ -153,15 +182,32 @@ function updateBoard() {
         tile.classList.add("path");
       }
 
-      // Add the monster icon
+      const crystal = findCrystal(row, col);
+      if (crystal && !crystal.collected) {
+        const crystalIcon = document.createElement("span");
+        crystalIcon.classList.add("crystal");
+        crystalIcon.textContent = "💎";
+        tile.appendChild(crystalIcon);
+      }
+
       if (monsterPosition.row === row && monsterPosition.col === col) {
         const monster = document.createElement("span");
         monster.classList.add("monster");
-       monster.textContent = "👹";
+        monster.textContent = "👾";
         tile.appendChild(monster);
       }
     }
   }
+}
+
+function findCrystal(row, col) {
+  for (let i = 0; i < crystals.length; i++) {
+    if (crystals[i].row === row && crystals[i].col === col) {
+      return crystals[i];
+    }
+  }
+
+  return null;
 }
 
 createBoard();
