@@ -1,13 +1,11 @@
 // Monster Mayhem
-// This project creates a 10x10 board of connected hexagons.
-// The player moves the monster and collects crystals.
+// Simple browser game using HTML, CSS and JavaScript.
+// The player moves the monster around a hexagon board and collects crystals.
 
 const rows = 10;
 const cols = 10;
 
 const hexWidth = 72;
-const hexHeight = 82;
-
 const horizontalSpacing = 54;
 const verticalSpacing = 62;
 
@@ -19,14 +17,8 @@ let monsterPosition = {
 let selectedTile = null;
 
 let score = 0;
-let movesLeft = 15;
+let movesLeft = 10;
 let gameOver = false;
-
-const crystals = [
-  { row: 1, col: 2, collected: false },
-  { row: 6, col: 7, collected: false },
-  { row: 8, col: 3, collected: false }
-];
 
 const board = document.getElementById("board");
 const statusText = document.getElementById("status");
@@ -35,7 +27,19 @@ const movesText = document.getElementById("moves");
 
 const tiles = [];
 
+// Several crystals are placed on the board.
+// The player scores points by moving the monster onto them.
+let crystals = [
+  { row: 1, col: 1 },
+  { row: 2, col: 6 },
+  { row: 5, col: 2 },
+  { row: 6, col: 7 },
+  { row: 8, col: 4 }
+];
+
 function createBoard() {
+  board.innerHTML = "";
+
   for (let row = 0; row < rows; row++) {
     tiles[row] = [];
 
@@ -69,6 +73,7 @@ function createBoard() {
 
 function handleTileClick(row, col) {
   if (gameOver) {
+    statusText.textContent = "Game over. Refresh the page to play again.";
     return;
   }
 
@@ -88,10 +93,21 @@ function handleTileClick(row, col) {
   if (selectedTile && isNeighbour(selectedTile, clickedTile)) {
     monsterPosition = clickedTile;
     selectedTile = clickedTile;
+
     movesLeft--;
+    movesText.textContent = movesLeft;
 
     checkCrystalCollection();
-    checkGameResult();
+
+    if (movesLeft === 0) {
+      gameOver = true;
+      statusText.textContent = `Game over. Final score: ${score}.`;
+    } else if (crystals.length === 0) {
+      gameOver = true;
+      statusText.textContent = `You collected all crystals. Final score: ${score}.`;
+    } else {
+      statusText.textContent = `Monster moved. Score: ${score}.`;
+    }
 
     updateBoard();
     return;
@@ -100,35 +116,6 @@ function handleTileClick(row, col) {
   selectedTile = clickedTile;
   statusText.textContent = `Selected row ${row + 1}, column ${col + 1}.`;
   updateBoard();
-}
-
-function checkCrystalCollection() {
-  for (let i = 0; i < crystals.length; i++) {
-    const crystal = crystals[i];
-
-    if (
-      !crystal.collected &&
-      crystal.row === monsterPosition.row &&
-      crystal.col === monsterPosition.col
-    ) {
-      crystal.collected = true;
-      score++;
-      statusText.textContent = "Crystal collected!";
-      return;
-    }
-  }
-
-  statusText.textContent = "Monster moved. Keep collecting crystals.";
-}
-
-function checkGameResult() {
-  if (score === crystals.length) {
-    gameOver = true;
-    statusText.textContent = "You win! All crystals were collected.";
-  } else if (movesLeft === 0) {
-    gameOver = true;
-    statusText.textContent = "Game over! You ran out of moves.";
-  }
 }
 
 function isNeighbour(tileA, tileB) {
@@ -152,10 +139,23 @@ function isNeighbour(tileA, tileB) {
   );
 }
 
-function updateBoard() {
-  scoreText.textContent = `Score: ${score} / ${crystals.length}`;
-  movesText.textContent = `Moves left: ${movesLeft}`;
+function checkCrystalCollection() {
+  const crystalIndex = crystals.findIndex(function (crystal) {
+    return (
+      crystal.row === monsterPosition.row &&
+      crystal.col === monsterPosition.col
+    );
+  });
 
+  if (crystalIndex !== -1) {
+    crystals.splice(crystalIndex, 1);
+    score++;
+    scoreText.textContent = score;
+    statusText.textContent = `Crystal collected. Score: ${score}.`;
+  }
+}
+
+function updateBoard() {
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const tile = tiles[row][col];
@@ -177,37 +177,31 @@ function updateBoard() {
         selectedTile &&
         selectedTile.row === monsterPosition.row &&
         selectedTile.col === monsterPosition.col &&
-        isNeighbour(selectedTile, currentTile)
+        isNeighbour(selectedTile, currentTile) &&
+        !gameOver
       ) {
         tile.classList.add("path");
       }
 
-      const crystal = findCrystal(row, col);
-      if (crystal && !crystal.collected) {
-        const crystalIcon = document.createElement("span");
-        crystalIcon.classList.add("crystal");
-        crystalIcon.textContent = "💎";
-        tile.appendChild(crystalIcon);
+      const hasCrystal = crystals.some(function (crystal) {
+        return crystal.row === row && crystal.col === col;
+      });
+
+      if (hasCrystal) {
+        const crystal = document.createElement("span");
+        crystal.classList.add("crystal");
+        crystal.textContent = "💎";
+        tile.appendChild(crystal);
       }
 
       if (monsterPosition.row === row && monsterPosition.col === col) {
         const monster = document.createElement("span");
         monster.classList.add("monster");
-        monster.textContent = "👾";
+        monster.textContent = "👻";
         tile.appendChild(monster);
       }
     }
   }
-}
-
-function findCrystal(row, col) {
-  for (let i = 0; i < crystals.length; i++) {
-    if (crystals[i].row === row && crystals[i].col === col) {
-      return crystals[i];
-    }
-  }
-
-  return null;
 }
 
 createBoard();

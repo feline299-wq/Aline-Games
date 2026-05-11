@@ -25,14 +25,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-.score-box {
-  display: flex;
-  justify-content: center;
-  gap: 25px;
-  margin: 10px 0;
-  font-weight: bold;
-}
-
 #status {
   font-weight: bold;
 }
