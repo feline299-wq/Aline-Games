@@ -1,0 +1,103 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f4f4;
+  color: #222;
+}
+
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.game-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#status {
+  font-weight: bold;
+}
+
+/*
+  The board uses absolute positioning because each hexagon needs to overlap
+  slightly with the next one. This helps remove gaps between the hexagons.
+*/
+#board {
+  position: relative;
+  width: 900px;
+  height: 760px;
+  margin: 0 auto;
+  background: #ddd;
+  border: 2px solid #999;
+  overflow: hidden;
+}
+
+/*
+  The clip-path creates the six-sided hexagon shape.
+  Each tile is still a normal div, but the visible shape is clipped.
+*/
+.hex {
+  position: absolute;
+  width: 72px;
+  height: 82px;
+  background: #d8d8d8;
+  border: 1px solid #555;
+  clip-path: polygon(
+    25% 0%,
+    75% 0%,
+    100% 50%,
+    75% 100%,
+    25% 100%,
+    0% 50%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.hex:hover {
+  background: #ffd36b;
+  transform: scale(1.03);
+}
+
+/* Selected tile */
+.hex.selected {
+  background: #4da3ff;
+  color: white;
+  font-weight: bold;
+}
+
+/* Tiles where the monster can move */
+.hex.path {
+  background: #8ee28e;
+}
+
+/* Monster character */
+.monster {
+  font-size: 28px;
+  pointer-events: none;
+}
+
+/* Small responsive adjustment */
+@media (max-width: 950px) {
+  #board {
+    width: 100%;
+    transform: scale(0.85);
+    transform-origin: top center;
+  }
+}
