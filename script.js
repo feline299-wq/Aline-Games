@@ -157,7 +157,7 @@ function updateBoard() {
       if (monsterPosition.row === row && monsterPosition.col === col) {
         const monster = document.createElement("span");
         monster.classList.add("monster");
-        monster.textContent = "👾";
+       monster.textContent = "👹";
         tile.appendChild(monster);
       }
     }
