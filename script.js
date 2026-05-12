@@ -101,10 +101,10 @@ function handleTileClick(row, col) {
 
     if (movesLeft === 0) {
       gameOver = true;
-      statusText.textContent = `Game over. Final score: ${score}.`;
+      statusText.textContent = `No more moves left! Final score: ${score}.`;
     } else if (crystals.length === 0) {
       gameOver = true;
-      statusText.textContent = `You collected all crystals. Final score: ${score}.`;
+      statusText.textContent = `You collected every crystal! Final score: ${score}.`;
     } else {
       statusText.textContent = `Monster moved. Score: ${score}.`;
     }
