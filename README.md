@@ -29,3 +29,14 @@ This project uses:
 - JavaScript
 
 The game runs directly in the browser.
+# Monster Mayhem
+
+## Repository
+https://github.com/feline299-wq/Aline-Games
+
+## Live Demo
+https://feline299-wq.github.io/Aline-Games/
+
+This project was created for the Client Side Web Development CA2.
+
+The game is played on a hexagon board.
